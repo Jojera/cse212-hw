@@ -12,6 +12,11 @@ public class TakingTurnsQueueTests
     // run until the queue is empty
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
     // Defect(s) Found: 
+    // 1. PersonQueue.Enqueue() uses Insert(0, person) instead of Add(person), creating stack (LIFO) 
+    //    behavior instead of queue (FIFO) behavior.
+    // 2. TakingTurnsQueue.GetNextPerson() uses if (person.Turns > 1) instead of properly handling 
+    //    all cases: infinite turns (<=0) should always re-enqueue, finite turns should decrement 
+    //    then re-enqueue if still > 0.
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
@@ -43,7 +48,7 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3)
     // After running 5 times, add George with 3 turns.  Run until the queue is empty.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
-    // Defect(s) Found: 
+    // Defect(s) Found: Same defects as TestTakingTurnsQueue_FiniteRepetition.
     public void TestTakingTurnsQueue_AddPlayerMidway()
     {
         var bob = new Person("Bob", 2);
@@ -86,6 +91,9 @@ public class TakingTurnsQueueTests
     // Run 10 times.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
     // Defect(s) Found: 
+    // 1. Same PersonQueue.Enqueue() defect as TestTakingTurnsQueue_FiniteRepetition.
+    // 2. TakingTurnsQueue.GetNextPerson() doesn't handle infinite turns (0 or less). The condition 
+    //    if (person.Turns > 1) excludes people with 0 turns, so they are not re-enqueued.
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -117,6 +125,9 @@ public class TakingTurnsQueueTests
     // Run 10 times.
     // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
     // Defect(s) Found: 
+    // 1. Same PersonQueue.Enqueue() defect as TestTakingTurnsQueue_FiniteRepetition.
+    // 2. TakingTurnsQueue.GetNextPerson() doesn't handle infinite turns (negative numbers). The 
+    //    condition if (person.Turns > 1) excludes people with negative turns, so they are not re-enqueued.
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
@@ -143,7 +154,7 @@ public class TakingTurnsQueueTests
     [TestMethod]
     // Scenario: Try to get the next person from an empty queue
     // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
+    // Defect(s) Found: None - this test passes with the original code.
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
